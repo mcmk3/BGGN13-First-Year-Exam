@@ -1,0 +1,131 @@
+---
+title: "Bioinformatics First Year Exam Q15"
+author: "Mirte Ciz Marieke Kuijpers"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Set Up
+
+First packages and the data need to be loaded into the R working environment.
+
+```{r Set Up}
+# Load data
+data <- read.csv("covid19_variants.csv", header = T)
+
+# Check data
+head(data, n = 2)
+tail(data, n = 2)
+summary(data)
+
+# Load packages
+library("ggplot2")
+library("dplyr")
+library("lubridate")
+
+```
+
+# Format data
+
+Note that `summary` shows us that `R` is treating the date column data as character data. This should be changed so that `R` can recognize this as time/date information.
+
+```{r Fix date column classification}
+# State of date before fixing
+class(data$date)
+
+# Use a Lubridate function to tell R that the date column holds dates not characters
+data$date <- ymd(data$date)
+
+# Check this was successful
+class(data$date)
+
+```
+Another thing to check is whether the variants present in the data match those in the plot I am trying to recreate, and remove any inappropriate categories.
+
+```{r Remove non-variants}
+# Check the variants present in the data
+unique(data$variant_name)
+
+# Remove "Total" and "Other", which are not in the template plot
+#### not (!) rows with Other or Total in the variant column
+dat <- data[!data$variant_name %in% c("Other", "Total"), ] 
+
+# Check if successful
+unique(dat$variant_name)
+```
+
+
+# Plot data
+
+Now that the data has been properly formatted it is possible to plot it. I will focus on first plotting the data correctly, and when this is complete I will make a secondary plot with appropriate aesthetics.
+
+```{r data plot, fig.width=10, fig.height= 6}
+# Basic plot
+ggplot(dat, aes(date, percentage, col = variant_name)) +
+  geom_line()
+
+# Plot with aesthetics
+ggplot(dat, aes(date, percentage, col = variant_name)) +
+  geom_line(cex = 0.6) +
+  theme_bw() + # basic theme to build upon
+  scale_x_date(date_labels = "%Y %b", date_breaks = "1 month") + # format axis
+  theme(axis.text.x=element_text(angle=60, hjust=1)) + # customize bw theme
+  labs(x = "", y = "Percentage of Sequenced Specimens", 
+       title = "COVID-19 variants in California", col = "", 
+       caption = "Data Source: <https://data.chhs.ca.gov/>") 
+
+```
+
+Note that within the "{r}" of this code chunk I added the following `fig.width=10, fig.height= 6` to ensure that the plots were knitted at a reasonable size into the final document. Without this customization they were a little smaller than I thought they should be.
+
+Now that the template plot has been replicated I can also play around with my own styles.
+
+```{r my plot, fig.width=10, fig.height= 6}
+# Subset the data for just the total numbers
+tot <- data[data$variant_name == "Total",]
+
+# My plot
+ggplot(dat, aes(x = date, col = variant_name)) +
+  geom_area(data = tot, aes(x = date, y = specimens_7d_avg/35), col = "navy", 
+            cex = 0.45, alpha = 0.05, fill = "black") +
+  geom_line(aes(y = percentage), cex = 1) +
+  scale_y_continuous(
+    # Features of the first axis
+    name = "Percentage of Sequenced Specimens",
+    # Add a second axis and specify its features
+    sec.axis = sec_axis( trans=~.*35, name="Total Specimens/Samples (7-day average)")
+  ) + 
+  theme_light() + # basic theme to build upon
+  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") + # format axis
+  theme(axis.text.x=element_text(angle=45, hjust=1)) + # customize bw theme
+  labs(x = "", title = "COVID-19 variants in California", col = "", 
+       caption = "Data Source: <https://data.chhs.ca.gov/>") 
+```
+I chose to overlay the COVID-19 variant data over the 7-day average of specimen numbers. I choose this 3rd variable because the more samples sequenced the more likely rare variants are sampled. Therefore, the 100% levels of Delta and Omicron during there peaks can be stated with more confidence when one notes that the sampling levels are high during these peaks. I chose the 7 day average because using all the specimen data (from the `specimen` column) led the eye away from the trend due to the many peaks and troughs of the higher resolution data. A more interesting metric here, rather than sample frequency, might be case frequency, although this could also be misleading, as the ability to detect and report cases, as well as the reliability of data collection and reporting has improved over the course of the pandemic.
+
+# Session Information
+
+```{r session information}
+sessionInfo()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
