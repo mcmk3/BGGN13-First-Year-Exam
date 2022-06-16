@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 First packages and the data need to be loaded into the R working environment.
 
-```{r Set Up}
+```{r Set Up, warning = FALSE}
 # Load data
 data <- read.csv("covid19_variants.csv", header = T)
 
@@ -28,6 +28,7 @@ library("dplyr")
 library("lubridate")
 
 ```
+
 
 # Format data
 
@@ -59,6 +60,7 @@ unique(dat$variant_name)
 ```
 
 
+
 # Plot data
 
 Now that the data has been properly formatted it is possible to plot it. I will focus on first plotting the data correctly, and when this is complete I will make a secondary plot with appropriate aesthetics.
@@ -84,7 +86,7 @@ Note that within the "{r}" of this code chunk I added the following `fig.width=1
 
 Now that the template plot has been replicated I can also play around with my own styles.
 
-```{r my plot, fig.width=10, fig.height= 6}
+```{r my plot, fig.width=10, fig.height= 8}
 # Subset the data for just the total numbers
 tot <- data[data$variant_name == "Total",]
 
@@ -101,11 +103,17 @@ ggplot(dat, aes(x = date, col = variant_name)) +
   ) + 
   theme_light() + # basic theme to build upon
   scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") + # format axis
-  theme(axis.text.x=element_text(angle=45, hjust=1)) + # customize bw theme
+  theme(axis.text.x=element_text(angle=45, hjust=1), legend.position="bottom",
+        legend.text = element_text(size=12.5), legend.key.size = unit(1.35, 'cm'),
+        title =element_text(size=20, face='bold'),
+        axis.title.y = element_text(size=12, face = 'plain'),
+        plot.caption = element_text(size = 10, face = 'italic')) + # customize bw theme
   labs(x = "", title = "COVID-19 variants in California", col = "", 
        caption = "Data Source: <https://data.chhs.ca.gov/>") 
 ```
 I chose to overlay the COVID-19 variant data over the 7-day average of specimen numbers. I choose this 3rd variable because the more samples sequenced the more likely rare variants are sampled. Therefore, the 100% levels of Delta and Omicron during there peaks can be stated with more confidence when one notes that the sampling levels are high during these peaks. I chose the 7 day average because using all the specimen data (from the `specimen` column) led the eye away from the trend due to the many peaks and troughs of the higher resolution data. A more interesting metric here, rather than sample frequency, might be case frequency, although this could also be misleading, as the ability to detect and report cases, as well as the reliability of data collection and reporting has improved over the course of the pandemic.
+
+Note that the legend size and legend text size has also been increased for easier reading.
 
 # Session Information
 
