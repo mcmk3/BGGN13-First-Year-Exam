@@ -1,6 +1,6 @@
 ---
 title: "Bioinformatics First Year Exam Q15"
-author: "Mirte Ciz Marieke Kuijpers"
+author: "Mirte Ciz Marieke Kuijpers - PID: A59010989"
 date: "`r Sys.Date()`"
 output: pdf_document
 ---
